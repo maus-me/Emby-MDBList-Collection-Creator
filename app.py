@@ -11,7 +11,7 @@ from src.db import Db
 from src.utils import find_missing_entries_in_list
 from src.utils import minutes_until_2100
 
-config_parser = configparser.ConfigParser()
+config_parser = configparser.ConfigParser(interpolation=None)
 config_parser.optionxform = str.lower
 
 # Check if config_hidden.cfg exists, if so, use that, otherwise use config.cfg
