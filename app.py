@@ -112,18 +112,15 @@ def process_list(mdblist_list: dict):
             newly_removed += emby.delete_from_collection(collection_name, item_ids)
             if newly_removed > 0:
                 logger.info(f"Collection {collection_name} is not active. Removed all items.")
-                logger.info("=========================================")
             return
 
     if collection_id is None:
         logger.info(f"Collection {collection_name} does not exist. Will create it.")
         frequency = 100  # If collection doesn't exist, download every time
 
-    logger.info("=========================================")
 
     if random.randint(0, 100) > frequency:
         logger.info(f"Skipping mdblist {collection_name} since frequency is {frequency}")
-        logger.info("=========================================")
         return
 
     mdblist_imdb_ids = []
@@ -134,7 +131,6 @@ def process_list(mdblist_list: dict):
         found_list_id = mdblist.find_list_id_by_name_and_user(mdblist_name, user_name)
         if found_list_id is None:
             logger.info(f"ERROR! List {mdblist_name} by {user_name} not found. Skipping.")
-            logger.info("=========================================")
             return
         mdblist_imdb_ids, mdblist_mediatypes = mdblist.get_list(found_list_id)
     elif source is not None:
@@ -148,12 +144,10 @@ def process_list(mdblist_list: dict):
             mdblist_mediatypes.extend(mediatypes)
     else:
         logger.error(f"ERROR! Must provide either id or source for {collection_name}.")
-        logger.info("=========================================")
         return
 
     if mdblist_imdb_ids is None:
         logger.error(f"ERROR! No items in {collection_name}. Will not process this list.")
-        logger.info("=========================================")
         return
 
     remove_emby_ids = []
@@ -163,7 +157,6 @@ def process_list(mdblist_list: dict):
         logger.error(
             f"ERROR! No items in mdblist {collection_name}. Will not process this list. Perhaps you need to wait for it to populate?"
         )
-        logger.info("=========================================")
         return
 
     mdblist_imdb_ids = list(set(mdblist_imdb_ids))  # Remove duplicates
@@ -179,7 +172,6 @@ def process_list(mdblist_list: dict):
             )
         except Exception as e:
             logger.error(f"Error getting items in collection: {e}")
-            logger.info("=========================================")
             return
 
         collection_imdb_ids = [item["Imdb"] for item in collection_items]
@@ -199,7 +191,6 @@ def process_list(mdblist_list: dict):
     if collection_id is None:
         if len(add_emby_ids) == 0:
             logger.error(f"ERROR! No items to put in mdblist {collection_name}.")
-            logger.info("=========================================")
             return
         # Create the collection with the first item since you have to create with an item
         collection_id = emby.create_collection(collection_name, [add_emby_ids[0]])
@@ -240,7 +231,6 @@ def process_list(mdblist_list: dict):
     elif overwrite_description is not None:
         emby.set_item_property(collection_id, "Overview", overwrite_description)
 
-    logger.info("=========================================")
 
 
 def process_my_lists_on_mdblist():
