@@ -22,7 +22,7 @@ class Db:
         if not os.path.exists(self.temp_dir):
             os.makedirs(self.temp_dir)
 
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(interpolation=ExtendedInterpolation())
 
         if os.path.exists(self.config_file):
             config.read(self.config_file)
