@@ -5,6 +5,9 @@ You can use this if you don't have access to the Emby database but you do have a
 
 import configparser
 import json
+import logging
+logger = logging.getLogger(__name__)
+
 from src.emby import Emby
 import os
 
@@ -21,6 +24,7 @@ emby_api_key = config_parser.get("admin", "emby_api_key")
 emby = Emby(emby_server_url, emby_user_id, emby_api_key)
 emby.seconds_between_requests = seconds_between_requests
 
+logger = logging.getLogger(__name__)
 
 def get_all_items(user_id, filter):
 
@@ -65,7 +69,7 @@ def main():
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    print(f"\nBacking up Watch history and Favorites for {len(all_users)} users\n")
+    logger.info(f"\nBacking up Watch history and Favorites for {len(all_users)} users\n")
 
     for filter in backup_filters:
         for user in all_users:
@@ -77,10 +81,10 @@ def main():
                 "filter": filter,
                 "Items": [],
             }
-            print(f"\nGetting {filter} items for {user_name}")
+            logger.info(f"\nGetting {filter} items for {user_name}")
             data["Items"] = get_all_items(user_id, filter)
             file_name = f"{directory}/{filter}_{user_name}.json"
-            print(f"\nWriting {len(data['Items'])} items to {file_name}")
+            logger.info(f"\nWriting {len(data['Items'])} items to {file_name}")
             with open(file_name, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4)
 

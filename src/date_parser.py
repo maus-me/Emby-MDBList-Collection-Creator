@@ -1,5 +1,7 @@
+import logging
 from datetime import datetime, date
 
+logger = logging.getLogger(__name__)
 
 def get_appropriate_year(month, day, reference_date):
     test_date = date(reference_date.year, month, day)
@@ -85,9 +87,9 @@ def main():
 
     for case in test_cases:
         result = inside_period(case)
-        print(f"Active period: {case}")
-        print(f"Current date is within range: {result}")
-        print("-" * 30)
+        logger.info(f"Active period: {case}")
+        logger.info(f"Current date is within range: {result}")
+        logger.info("-" * 30)
 
 
 if __name__ == "__main__":

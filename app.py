@@ -1,4 +1,11 @@
+# At the beginning of app.py
+from src.logger_config import setup_logging
+
+# Configure logging before importing other modules
+setup_logging()
+
 import random
+import logging
 import time
 import configparser
 import requests
@@ -11,7 +18,16 @@ from src.db import Db
 from src.utils import find_missing_entries_in_list
 from src.utils import minutes_until_2100
 
-config_parser = configparser.ConfigParser(interpolation=ExtendedInterpolation())
+logger = logging.getLogger(__name__)
+
+# 'application' code
+logger.debug('debug message')
+logger.info('info message')
+logger.warning('warn message')
+logger.error('error message')
+logger.critical('critical message')
+
+config_parser = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
 config_parser.optionxform = str.lower
 
 # Check if config_hidden.cfg exists, if so, use that, otherwise use config.cfg
@@ -95,20 +111,19 @@ def process_list(mdblist_list: dict):
             )
             newly_removed += emby.delete_from_collection(collection_name, item_ids)
             if newly_removed > 0:
-                print(f"Collection {collection_name} is not active. Removed all items.")
-                print("=========================================")
+                logger.info(f"Collection {collection_name} is not active. Removed all items.")
+                logger.info("=========================================")
             return
 
     if collection_id is None:
-        print(f"Collection {collection_name} does not exist. Will create it.")
+        logger.info(f"Collection {collection_name} does not exist. Will create it.")
         frequency = 100  # If collection doesn't exist, download every time
 
-    print()
-    print("=========================================")
+    logger.info("=========================================")
 
     if random.randint(0, 100) > frequency:
-        print(f"Skipping mdblist {collection_name} since frequency is {frequency}")
-        print("=========================================")
+        logger.info(f"Skipping mdblist {collection_name} since frequency is {frequency}")
+        logger.info("=========================================")
         return
 
     mdblist_imdb_ids = []
@@ -118,8 +133,8 @@ def process_list(mdblist_list: dict):
     elif mdblist_name is not None and user_name is not None:
         found_list_id = mdblist.find_list_id_by_name_and_user(mdblist_name, user_name)
         if found_list_id is None:
-            print(f"ERROR! List {mdblist_name} by {user_name} not found. Skipping.")
-            print("=========================================")
+            logger.info(f"ERROR! List {mdblist_name} by {user_name} not found. Skipping.")
+            logger.info("=========================================")
             return
         mdblist_imdb_ids, mdblist_mediatypes = mdblist.get_list(found_list_id)
     elif source is not None:
@@ -132,27 +147,27 @@ def process_list(mdblist_list: dict):
             mdblist_imdb_ids.extend(imdb_ids)
             mdblist_mediatypes.extend(mediatypes)
     else:
-        print(f"ERROR! Must provide either id or source for {collection_name}.")
-        print("=========================================")
+        logger.error(f"ERROR! Must provide either id or source for {collection_name}.")
+        logger.info("=========================================")
         return
 
     if mdblist_imdb_ids is None:
-        print(f"ERROR! No items in {collection_name}. Will not process this list.")
-        print("=========================================")
+        logger.error(f"ERROR! No items in {collection_name}. Will not process this list.")
+        logger.info("=========================================")
         return
 
     remove_emby_ids = []
     missing_imdb_ids = []
 
     if len(mdblist_imdb_ids) == 0:
-        print(
+        logger.error(
             f"ERROR! No items in mdblist {collection_name}. Will not process this list. Perhaps you need to wait for it to populate?"
         )
-        print("=========================================")
+        logger.info("=========================================")
         return
 
     mdblist_imdb_ids = list(set(mdblist_imdb_ids))  # Remove duplicates
-    print(f"Processing {collection_name}. List has {len(mdblist_imdb_ids)} IMDB IDs")
+    logger.info(f"Processing {collection_name}. List has {len(mdblist_imdb_ids)} IMDB IDs")
     collection_id = emby.get_collection_id(collection_name)
 
     if collection_id is None:
@@ -163,8 +178,8 @@ def process_list(mdblist_list: dict):
                 collection_id, ["ProviderIds"]
             )
         except Exception as e:
-            print(f"Error getting items in collection: {e}")
-            print("=========================================")
+            logger.error(f"Error getting items in collection: {e}")
+            logger.info("=========================================")
             return
 
         collection_imdb_ids = [item["Imdb"] for item in collection_items]
@@ -179,13 +194,12 @@ def process_list(mdblist_list: dict):
     # Need Emby Item Ids instead of IMDB IDs to add to collection
     add_emby_ids = emby.get_items_with_imdb_id(missing_imdb_ids, mdblist_mediatypes)
 
-    print()
-    print(f"Added {len(add_emby_ids)} new items and removed {len(remove_emby_ids)}")
+    logger.info(f"Added {len(add_emby_ids)} new items and removed {len(remove_emby_ids)}")
 
     if collection_id is None:
         if len(add_emby_ids) == 0:
-            print(f"ERROR! No items to put in mdblist {collection_name}.")
-            print("=========================================")
+            logger.error(f"ERROR! No items to put in mdblist {collection_name}.")
+            logger.info("=========================================")
             return
         # Create the collection with the first item since you have to create with an item
         collection_id = emby.create_collection(collection_name, [add_emby_ids[0]])
@@ -215,7 +229,7 @@ def process_list(mdblist_list: dict):
     ):
         collection_sort_name = f"!{minutes_until_2100()} {collection_name}"
         emby.set_item_property(collection_id, "ForcedSortName", collection_sort_name)
-        print(f"Updated sort name for {collection_name} to {collection_sort_name}")
+        logger.info(f"Updated sort name for {collection_name} to {collection_sort_name}")
 
     if (
         use_mdblist_collection_description is True
@@ -226,13 +240,13 @@ def process_list(mdblist_list: dict):
     elif overwrite_description is not None:
         emby.set_item_property(collection_id, "Overview", overwrite_description)
 
-    print("=========================================")
+    logger.info("=========================================")
 
 
 def process_my_lists_on_mdblist():
     my_lists = mdblist.get_my_lists()
     if len(my_lists) == 0:
-        print("ERROR! No lists returned from MDBList API. Will not process any lists.")
+        logger.error("ERROR! No lists returned from MDBList API. Will not process any lists.")
         return
 
     for mdblist_list in my_lists:
@@ -268,7 +282,7 @@ def process_hardcoded_lists():
                 }
             )
         except configparser.NoOptionError as e:
-            print(f"Error in config file, section: {section}: {e}")
+            logger.error(f"Error in config file, section: {section}: {e}")
 
     for mdblist_list in collections:
         process_list(mdblist_list)
@@ -281,7 +295,7 @@ def set_poster(collection_id, collection_name, poster_path=None):
 
     Args:
         collection_id (str): The ID of the collection.
-        collection_name (str): The name of the collection. Only used for logging.
+        collection_name (str): The name of the collection. Only used for logger.
         poster_path (str): The path or URL to the new poster image.
 
     Returns:
@@ -292,57 +306,60 @@ def set_poster(collection_id, collection_name, poster_path=None):
         return
 
     if poster_path == db_manager.get_config_for_section(collection_id, "poster_path"):
-        print(f"Poster for {collection_name} is already set to the specified path.")
+        logger.info(f"Poster for {collection_name} is already set to the specified path.")
         return
 
     if emby.set_image(collection_id, poster_path):
         db_manager.set_config_for_section(collection_id, "poster_path", poster_path)
-        print(f"Poster for {collection_name} has been set successfully.")
+        logger.info(f"Poster for {collection_name} has been set successfully.")
     else:
-        print(f"Failed to set poster for {collection_name}.")
+        logger.info(f"Failed to set poster for {collection_name}.")
 
 
 def main():
+    logging.basicConfig(filename='logs/logs.log', level=logging.INFO)
+
     global newly_added
     global newly_removed
     iterations = 0
 
-    # print(f"Emby System Info: {emby.get_system_info()}")
-    # print()
-    # print(f"Emby Users: {emby.get_users()}")
-    # print()
-    # print(f"MDBList User Info: {mdblist.get_mdblist_user_info()}")
-    # print()
+    # logger.info(f"Emby System Info: {emby.get_system_info()}")
+    # logger.info()
+    # logger.info(f"Emby Users: {emby.get_users()}")
+    # logger.info()
+    # logger.info(f"MDBList User Info: {mdblist.get_mdblist_user_info()}")
+    # logger.info()
 
     # Test getting a list via url
     # mdblist_list = mdblist.get_list_using_url(
     #    "https://mdblist.com/lists/amything/best-documentaries"
     # )
-    # print(mdblist_list)
+    # logger.info(mdblist_list)
     # return
 
     # Test getting all Emby collections
-    # print(emby.get_all_collections(False))
+    # logger.info(emby.get_all_collections(False))
     # return
 
     while True:
 
         try:
-            response = requests.get("http://www.google.com/", timeout=5)
+            response = requests.get("https://www.google.com/", timeout=5)
+            logger.info("Internet connection is available.")
         except requests.RequestException:
-            print("No internet connection. Check your connection. Retrying in 5 min...")
+            logger.warning("No internet connection. Check your connection. Retrying in 5 min...")
             time.sleep(300)
             continue
 
         emby_info = emby.get_system_info()
         if emby_info is False:
-            print("Error connecting to Emby. Retrying in 5 min...")
+            logger.error("Error connecting to Emby. Retrying in 5 min...")
             time.sleep(300)
             continue
 
         mdblist_user_info = mdblist.get_user_info()
         if mdblist_user_info is False:
-            print("Error connecting to MDBList. Retrying in 5 min...")
+            logger.error("Error connecting to MDBList. Retrying in 5 min...")
             time.sleep(300)
             continue
 
@@ -352,25 +369,25 @@ def main():
         if download_my_mdblist_lists_automatically:
             process_my_lists_on_mdblist()
 
-        print(
+        logger.info(
             f"\nSUMMARY: Added {newly_added} to collections and removed {newly_removed}\n"
         )
         newly_added = 0
         newly_removed = 0
 
         if len(collection_ids_with_custom_sorting) > 0:
-            print("Setting sort names for new items in collections")
+            logger.info("Setting sort names for new items in collections")
             for collection_id in collection_ids_with_custom_sorting:
                 item_sorting.process_collection(collection_id)
 
-            print(
+            logger.info(
                 "\n\nReverting sort names that are no longer in collections, fetching items:"
             )
 
         item_sorting.reset_items_not_in_custom_sort_categories()
 
         if refresh_items is True:
-            print(
+            logger.info(
                 f"\nRefreshing metadata for items that were added within {refresh_items_max_days_since_added} days AND premiered within {refresh_items_max_days_since_premiered} days."
             )
 
@@ -385,7 +402,7 @@ def main():
         if hours_between_refresh == 0:
             break
 
-        print(f"\n\nWaiting {hours_between_refresh} hours for next refresh.\n\n")
+        logger.info(f"\n\nWaiting {hours_between_refresh} hours for next refresh.\n\n")
         time.sleep(hours_between_refresh * 3600)
         iterations += 1
 

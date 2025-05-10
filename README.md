@@ -1,12 +1,8 @@
 ![](images/banner.jpeg)
 
-# Emby MDBList Collection Creator 1.83
+# Emby MDBList Collection Creator 1.84
 
 This tool allows you to convert lists from MDBList.com into collections within your Emby media server. MDBList aggregates content lists from various platforms including Trakt and IMDB.
-
-## Plugin version now available!
-
-If you prefer to make life easier you can use the [Plugin Version on ACdb.tv Automated Collections](https://acdb.tv/). Read more at the bottom of readme. If not, continue reading!
 
 ## Features
 
@@ -17,10 +13,6 @@ If you prefer to make life easier you can use the [Plugin Version on ACdb.tv Aut
 * Collection Ordering: Show your collections in order of which one was updated last
 * Collection Description: Add description from MDBList or create your own
 * Backup & Restore: Additional utilities to backup and restore watch history and favorites
-
-## Support me
-
-* Please consider [subscribing to my Patreon](https://www.patreon.com/c/acdbtv) even though you use this script and not ACdb.
 
 ## Prerequisites:
 
@@ -94,7 +86,7 @@ version: '3.8'
 
 services:
     emby-mdblist-collection-creator:
-        image: ghcr.io/jonjonsson/emby-mdblist-collection-creator:latest
+        image: ghcr.io/maus-me/emby-mdblist-collection-creator
         volumes:
             - /path/to/config.cfg:/app/config.cfg
 ```
@@ -223,36 +215,7 @@ See examples in config.cfg.
 * Renamed some variables to avoid naming conflicts. 
 * Updated Readme to include information about ACdb.tv.
 
-
-
-# 🚀 Try the ACdb.tv Automated Collections Plugin for Emby!
-
-## Looking for an easier way to sync MDBList collections with Emby?
-Check out the [ACdb.tv Automated Collections plugin](https://acdb.tv/) — no Python or manual setup required! Install directly from the Emby plugin catalog and manage everything from ACdb.tv.
-
-![ACdb.tv collection repository](images/ACdb_Official_Collections.png)
-
-## Key Features:
-- Easily install the plugin from Emby Plugin Catalog
-- Easy webapp-based configuration at [acdb.tv](https://acdb.tv/) instead of fiddling with config files.
-- Dynamic movie & TV collections synced automatically
-- Scheduled/seasonal collections (show only during specific periods)
-- Custom collection ordering (move updated collections to the top)
-- Ability to see which items you have and do not have in a collection (Patreon feature)
-- Coming soon: Collection posters with a poster gallery
-
-## How to Get Started:
-![ACdb.tv Plugin install](images/ACdb_plugin_install.png)
-- Install from the Emby plugin catalog (see [Getting Started](https://acdb.tv/))
-- Free: 3 collections
-- $2/month: Up to 20 collections, any MDBList, full customization
-
-### Seasonal Collection in ACdb.tv
-![ACdb.tv seasonal collections](images/ACdb_seasonal_collections.png)
-
-### View which items you have to do not have from a collection
-![ACdb.tv see which items you have, and](images/ACdb_missing_items.png)
-
-### Modify collection sort order, schedule and more
-![ACdb.tv example of collection settings](images/ACdb_collection_settings.png)
-
+### Version 1.84
+* Fixed a bug where the script would crash if an encoded (%) url was not escaped (%%).
+* Removed ads from the readme.
+* Switched configinterpreter to use the extended interpreter.

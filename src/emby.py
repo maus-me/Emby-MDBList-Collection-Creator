@@ -1,8 +1,11 @@
 import os
+import logging
 import time
 import requests
 import base64
 from urllib.parse import quote
+
+logger = logging.getLogger(__name__)
 
 ## Helpful URLS for dev:
 # https://swagger.emby.media/?staticview=true#/
@@ -31,7 +34,7 @@ class Emby:
             response = requests.get(url, headers=self.headers)
             return response.json()
         except Exception as e:
-            print(
+            logger.error(
                 f"Error occurred while getting Emby system info, check your configuration. Check your Emby url and port, user ID and API key: {e}"
             )
             return False
@@ -43,10 +46,10 @@ class Emby:
         try:
             return user_list_response.json()
         except Exception as e:
-            print(f"Error occurred while getting users: {e}")
+            logger.error(f"Error occurred while getting users: {e}")
             return None
 
-    def get_items_starting_with_sort_name(self, filter, limit=20):
+    def get_items_starting_with_sort_name(self, filter, limit=50):
         """
         Retrieves all movies and series whose SortName starts with the specified filter.
         Must be queried like this because it's not possible to search for SortName directly.
@@ -57,7 +60,6 @@ class Emby:
         Returns:
             list: A list of items (movies and series) whose SortName starts with the filter.
         """
-        limit = 50
         start_index = 0
         filtered_items = []
         found_sort_name = True
@@ -179,7 +181,7 @@ class Emby:
         try:
             items = response.json()
         except Exception as e:
-            print(
+            logger.info(
                 f"Error occurred while getting collections using url {url}: {e}. Response: {response}"
             )
             return None
@@ -222,7 +224,7 @@ class Emby:
         try:
             items = response.json()
         except Exception as e:
-            print(
+            logger.info(
                 f"Error occurred while getting items in collection id {collection_id} using url {url} response was {response}: {e}"
             )
             return None
@@ -260,7 +262,7 @@ class Emby:
             bool: True if the collection is created successfully, False otherwise.
         """
         if not item_ids:
-            print("Can't create collection, no items to add to it.")
+            logger.info("Can't create collection, no items to add to it.")
             return None
 
         response = requests.post(
@@ -268,10 +270,10 @@ class Emby:
         )
 
         if response.status_code != 200:
-            print(f"Error creating {collection_name}, response: {response}")
+            logger.info(f"Error creating {collection_name}, response: {response}")
             return None
 
-        print(f"Successfully created collection {collection_name}")
+        logger.info(f"Successfully created collection {collection_name}")
         return response.json()["Id"]
 
     # Not tested and not working for collections.
@@ -299,7 +301,7 @@ class Emby:
         try:
             return requests.get(url, headers=self.headers).json()
         except Exception as e:
-            print(f"Error occurred while getting item: {e}. URL: {url}.")
+            logger.info(f"Error occurred while getting item: {e}. URL: {url}.")
             return None
 
     def set_item_property(self, item_id, property_name, property_value):
@@ -335,7 +337,7 @@ class Emby:
         )
         time.sleep(self.seconds_between_requests)
         if response.status_code != 204:
-            print(f"Error refreshing item {item_id}, response: {response}")
+            logger.error(f"Error refreshing item {item_id}, response: {response}")
             return False
         return True
 
@@ -395,7 +397,7 @@ class Emby:
             try:
                 response_data = response.json()
             except Exception as e:
-                print(
+                logger.info(
                     f"Error getting items using URL {url} params {query_params} with response {response.content}. Error: {e}"
                 )
                 return None
@@ -431,7 +433,7 @@ class Emby:
         if response.status_code == 200:
             return True
         else:
-            print(
+            logger.error(
                 f"Error marking item {item_id} as played for user {user_id}: {response.content}"
             )
             return False
@@ -453,7 +455,7 @@ class Emby:
         if response.status_code == 200:
             return True
         else:
-            print(
+            logger.error(
                 f"Error marking item {item_id} as a favorite for user {user_id}: {response.content}"
             )
             return False
@@ -522,11 +524,11 @@ class Emby:
             if response.status_code == 204:
                 return True
             else:
-                print(f"Error setting image for item {item_id}, response: {response}")
+                logger.error(f"Error setting image for item {item_id}, response: {response}")
                 return False
 
         except Exception as e:
-            print(f"Exception occurred while downloading image: {str(e)}")
+            logger.error(f"Exception occurred while downloading image: {str(e)}")
             return False
 
     def __upload_image(self, item_id, image_path, image_type="Primary"):
@@ -543,12 +545,12 @@ class Emby:
         """
 
         if not os.path.exists(image_path):
-            print(f"Error: Image file not found: {image_path}")
+            logger.error(f"Error: Image file not found: {image_path}")
             return False
 
         allowed_types = [".jpg", ".jpeg", ".png", ".tbn"]
         if not any(image_path.lower().endswith(ext) for ext in allowed_types):
-            print(
+            logger.error(
                 f"Unsupported image format. Must be one of: {', '.join(allowed_types)}"
             )
             return False
@@ -577,11 +579,11 @@ class Emby:
             if response.status_code == 204:
                 return True
             else:
-                print(f"Error uploading image for item {item_id}, response: {response}")
+                logger.error(f"Error uploading image for item {item_id}, response: {response}")
                 return False
 
         except Exception as e:
-            print(f"Exception occurred while uploading image: {str(e)}")
+            logger.error(f"Exception occurred while uploading image: {str(e)}")
             return False
 
     def __update_item(self, item_id, data):
@@ -598,13 +600,13 @@ class Emby:
         )
         try:
             response = requests.post(update_item_url, json=item, headers=self.headers)
-            print(
+            logger.info(
                 f"Updated item {item_id} with {data}. Waiting {self.seconds_between_requests} seconds."
             )
             time.sleep(self.seconds_between_requests)
             return response
         except Exception as e:
-            print(f"Error occurred while updating item: {e}")
+            logger.error(f"Error occurred while updating item: {e}")
             return None
 
     def __add_remove_from_collection(
@@ -624,7 +626,7 @@ class Emby:
         batch_size = self.api_batch_size
         num_batches = (len(item_ids) + batch_size - 1) // batch_size
 
-        print(
+        logger.info(
             f"Processing {collection_name} with '{operation}' in {num_batches} batches"
         )
 
@@ -644,7 +646,7 @@ class Emby:
                 )
 
             if response.status_code != 204:
-                print(
+                logger.info(
                     f"Error processing collection with operation '{operation}', response: {response}"
                 )
                 return affected_count
@@ -652,8 +654,7 @@ class Emby:
             affected_count += len(batch_item_ids)
             time.sleep(self.seconds_between_requests)
 
-        print()
-        print(f"Finished '{operation}' with {len(item_ids)} items in {collection_name}")
+        logger.info(f"Finished '{operation}' with {len(item_ids)} items in {collection_name}")
 
         return affected_count
 

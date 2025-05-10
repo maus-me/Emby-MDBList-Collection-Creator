@@ -1,6 +1,8 @@
 from urllib.parse import quote
+import logging
 import requests
 
+logger = logging.getLogger(__name__)
 
 class Mdblist:
 
@@ -31,7 +33,7 @@ class Mdblist:
             user_info = response.json()
             return user_info
         except Exception as e:
-            print(f"Error getting MDBList user info: {e}")
+            logger.info(f"Error getting MDBList user info: {e}")
             return False
 
     # Take the json encoded list and return the mediatypes as a list
@@ -88,7 +90,7 @@ class Mdblist:
                 # To be compatible with old api and when using /json to get lists, I'm merging movies and shows into one list
                 result = result["movies"] + result["shows"]
             except Exception:
-                print(f"Error! Cannot decode json, make sure URL is valid: {url}")
+                logger.info(f"Error! Cannot decode json, make sure URL is valid: {url}")
                 return None, None
             if filter_imdb_ids is False:
                 return result, self.check_list_mediatype(result)
@@ -99,15 +101,15 @@ class Mdblist:
                     imdb_id = item["imdb_id"]
                     imdb_ids.append(imdb_id)
                 else:
-                    print(f"Warning: Could not find imdb_id in item {item}.")
+                    logger.info(f"Warning: Could not find imdb_id in item {item}.")
 
             if len(imdb_ids) == 0:
-                print(
+                logger.info(
                     f"ERROR! Cannot find any items in list id {list_id} with api url {url} and public url https://mdblist.com/?list={list_id}."
                 )
             return imdb_ids, self.check_list_mediatype(result)
         else:
-            print(f"No response received from {url}")
+            logger.info(f"No response received from {url}")
             return None, None
 
     def get_list_using_url(self, url):
@@ -130,14 +132,14 @@ class Mdblist:
                 if "imdb_id" in item:
                     imdb_ids.append(item["imdb_id"])
                 else:
-                    print(f"Could not find imdb_id in item {item}.")
+                    logger.info(f"Could not find imdb_id in item {item}.")
             if len(imdb_ids) == 0:
-                print(
+                logger.info(
                     f"ERROR! Cannot find any items in list with api url {url} and public url {url.replace('/json','')}."
                 )
             return imdb_ids, self.check_list_mediatype(lst)
         else:
-            print(f"No response received from {url}")
+            logger.info(f"No response received from {url}")
             return None, None
 
     def get_my_lists(self) -> list:
@@ -184,7 +186,7 @@ class Mdblist:
         if len(filtered) == 0:
             return None
         if len(filtered) > 1:
-            print(
+            logger.info(
                 f"Warning! Found {len(filtered)} lists with name {list_name} by user {user_name}. Will use the first one."
             )
         return filtered[0]["id"]
@@ -334,17 +336,17 @@ class Mdblist:
 
         if isinstance(list_info, dict):
             error = list_info.get("error")
-            print(f"Error getting list {url} : {error}")
+            logger.info(f"Error getting list {url} : {error}")
             return None
 
         if not isinstance(list_info, list):
-            print(f"Error getting list, it should a list! {url} : {list_info}")
+            logger.info(f"Error getting list, it should a list! {url} : {list_info}")
             return None
 
         if len(list_info) > 0:  # return first list info
             return list_info[0]
 
-        print(f"Error getting list! {list_info}")
+        logger.info(f"Error getting list! {list_info}")
         return None
 
     def get_list_info_by_url(self, url):
@@ -365,7 +367,7 @@ class Mdblist:
         url = url.replace("https://mdblist.com/lists/", "")
         parts = url.split("/")
         if len(parts) != 2:
-            print(f"Error! URL {url} is not in the expected format.")
+            logger.info(f"Error! URL {url} is not in the expected format.")
             return None
         username = parts[0]
         listname = parts[1]
@@ -392,5 +394,5 @@ class Mdblist:
         if response.status_code == 200:
             return response.json()
         else:
-            print(f"Error getting limits: {response.status_code}")
+            logger.info(f"Error getting limits: {response.status_code}")
             return None

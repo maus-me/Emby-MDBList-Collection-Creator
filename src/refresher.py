@@ -1,5 +1,8 @@
 from datetime import datetime
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Refresher:
     """
@@ -32,7 +35,7 @@ class Refresher:
             collection_id (int): The ID of the emby collection to process.
             max_days_since_added (int): Will be refreshed if the item was added to Emby less than this number of days ago.
             max_days_since_premiered (int): Will be refreshed if the item premiered less than this number of days ago.
-            show_rating_change (bool): If True, will print the rating change for each item, requires an additional API request for each item.
+            show_rating_change (bool): If True, will logger.info the rating change for each item, requires an additional API request for each item.
         """
 
         items_in_collection = self.emby.get_items_in_collection(
@@ -46,7 +49,7 @@ class Refresher:
             # Current date
 
             if item["Id"] in self.processed_items:
-                # print(f"Item already processed: {item['Id']} {item['Name']}")
+                # logger.info(f"Item already processed: {item['Id']} {item['Name']}")
                 continue
 
             self.processed_items.append(item["Id"])
@@ -58,7 +61,7 @@ class Refresher:
                 )
                 created_date = created_date.replace(tzinfo=None)
             except Exception as e:
-                print(
+                logger.info(
                     f"Error parsing DateCreated ({item['DateCreated']}) for {item['Id']}: {item['Name']}. Error: {e}"
                 )
                 continue
@@ -66,7 +69,7 @@ class Refresher:
             premier_date = None
 
             if item["PremiereDate"] is None:
-                print(
+                logger.info(
                     f"Premiere date missing. Setting date to now: {item['Id']} {item['Name']}"
                 )
                 premier_date = current_date
@@ -80,16 +83,16 @@ class Refresher:
             days_since_premiered = (current_date - premier_date).days
 
             if days_since_premiered > max_days_since_premiered:
-                # print(f"Premiered {max_days_since_premiered} days ago: {item['Name']}")
+                # logger.info(f"Premiered {max_days_since_premiered} days ago: {item['Name']}")
                 continue
 
             if days_since_created > max_days_since_added:
-                # print(f"Added more than {max_days_since_added} days ago {item['Name']}")
+                # logger.info(f"Added more than {max_days_since_added} days ago {item['Name']}")
                 continue
 
             r = self.emby.refresh_item(item["Id"])
             if r is True:
-                print(f"    {item['Name']}")
+                logger.info(f"    {item['Name']}")
                 if not show_rating_change:
                     continue
                 old_rating = item["CommunityRating"]
@@ -97,9 +100,9 @@ class Refresher:
                 if "CommunityRating" not in item:
                     item["CommunityRating"] = 0
                 new_rating = item["CommunityRating"]
-                print(f"    Rating change {old_rating} -> {new_rating}")
+                logger.info(f"    Rating change {old_rating} -> {new_rating}")
             else:
-                print(f"ERROR: Item refresh fail: {item['Id']} {item['Name']}")
+                logger.error(f"ERROR: Item refresh fail: {item['Id']} {item['Name']}")
 
 
 def main():

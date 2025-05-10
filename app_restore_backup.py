@@ -33,11 +33,14 @@ Json file exmple:
         },
     etc
 """
+import logging
 
 from src.emby import Emby
 import ast
 import sys
 from argparse import ArgumentParser
+
+logger = logging.getLogger(__name__)
 
 backup_filters = ["IsPlayed", "IsFavorite"]
 
@@ -49,7 +52,7 @@ def get_provider_id(provider_ids, key):
 
 
 def add_error(error):
-    print(f"\nERROR: {error}")
+    logger.error(f"\nERROR: {error}")
 
 
 def main(args):
@@ -132,7 +135,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     if len(sys.argv) == 1:
-        parser.print_help()
+        parser.print.info_help()
         quit()
 
     parser.add_argument("-host", dest="host", help="Destination Emby host")
