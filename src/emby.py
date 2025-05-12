@@ -309,16 +309,12 @@ class Emby:
 
     def get_collection_id(self, collection_name):
         all_collections = self.get_all_collections(False)
-        collection_found = False
+        collection_id = None
 
         for collection in all_collections:
             if collection_name == collection["Name"]:
-                collection_found = True
                 collection_id = collection["Id"]
                 break
-
-        if collection_found is False:
-            return None
 
         return collection_id
 
