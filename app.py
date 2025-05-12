@@ -20,13 +20,6 @@ from src.utils import minutes_until_2100
 
 logger = logging.getLogger(__name__)
 
-# 'application' code
-logger.debug('debug message')
-logger.info('info message')
-logger.warning('warn message')
-logger.error('error message')
-logger.critical('critical message')
-
 config_parser = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
 config_parser.optionxform = str.lower
 
@@ -38,6 +31,7 @@ emby_server_url = config_parser.get("admin", "emby_server_url")
 emby_user_id = config_parser.get("admin", "emby_user_id")
 emby_api_key = config_parser.get("admin", "emby_api_key")
 mdblist_api_key = config_parser.get("admin", "mdblist_api_key")
+
 download_manually_added_lists = config_parser.getboolean(
     "admin", "download_manually_added_lists", fallback=True
 )
@@ -95,12 +89,18 @@ def process_list(mdblist_list: dict):
     overwrite_description = mdblist_list.get("overwrite_description", None)  # From cfg
 
     collection_id = emby.get_collection_id(collection_name)
+
     active_period_str = config_parser.get(
         collection_name, "active_between", fallback=None
     )
 
     if active_period_str:
         if not inside_period(active_period_str):
+            # Check if collection even exists
+            if collection_id is None:
+                logger.info(f"Seasonal collection {collection_name} does not exist. Will not process.")
+                return
+
             all_items_in_collection = emby.get_items_in_collection(
                 collection_id, ["Id"]
             )
@@ -109,9 +109,13 @@ def process_list(mdblist_list: dict):
                 if all_items_in_collection is not None
                 else []
             )
+
             newly_removed += emby.delete_from_collection(collection_name, item_ids)
+
             if newly_removed > 0:
                 logger.info(f"Collection {collection_name} is not active. Removed all items.")
+            else:
+                logger.info(f"Collection {collection_name} is not active. No items to remove.")
             return
 
     if collection_id is None:
@@ -236,7 +240,7 @@ def process_list(mdblist_list: dict):
 def process_my_lists_on_mdblist():
     my_lists = mdblist.get_my_lists()
     if len(my_lists) == 0:
-        logger.error("ERROR! No lists returned from MDBList API. Will not process any lists.")
+        logger.error("No lists returned from MDBList API. Will not process any lists.")
         return
 
     for mdblist_list in my_lists:
