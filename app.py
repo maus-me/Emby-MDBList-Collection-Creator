@@ -364,7 +364,7 @@ def main():
             process_my_lists_on_mdblist()
 
         logger.info(
-            f"\nSUMMARY: Added {newly_added} to collections and removed {newly_removed}\n"
+            f"SUMMARY: Added {newly_added} to collections and removed {newly_removed}\n\n"
         )
         newly_added = 0
         newly_removed = 0
@@ -382,7 +382,7 @@ def main():
 
         if refresh_items is True:
             logger.info(
-                f"\nRefreshing metadata for items that were added within {refresh_items_max_days_since_added} days AND premiered within {refresh_items_max_days_since_premiered} days."
+                f"Refreshing metadata for items that were added within {refresh_items_max_days_since_added} days AND premiered within {refresh_items_max_days_since_premiered} days.\n"
             )
 
         for collection_id in all_collections_ids:
@@ -396,7 +396,7 @@ def main():
         if hours_between_refresh == 0:
             break
 
-        logger.info(f"\n\nWaiting {hours_between_refresh} hours for next refresh.\n\n")
+        logger.info(f"Waiting {hours_between_refresh} hours for next refresh.\n\n")
         time.sleep(hours_between_refresh * 3600)
         iterations += 1
 
