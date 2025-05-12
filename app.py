@@ -38,9 +38,6 @@ download_manually_added_lists = config_parser.getboolean(
 download_my_mdblist_lists_automatically = config_parser.getboolean(
     "admin", "download_my_mdblist_lists_automatically", fallback=True
 )
-update_collection_sort_name = config_parser.getboolean(
-    "admin", "update_collection_sort_name", fallback=True
-)
 update_items_sort_names_default_value = config_parser.getboolean(
     "admin", "update_items_sort_names_default_value", fallback=False
 )
@@ -85,6 +82,8 @@ def process_list(mdblist_list: dict):
         "update_items_sort_names", update_items_sort_names_default_value
     )
     collection_sort_name = mdblist_list.get("collection_sort_name", None)
+    collection_sort_prefix = mdblist_list.get("collection_sort_prefix", None)
+    collection_sort_date = mdblist_list.get("collection_sort_date", False)
     description = mdblist_list.get("description", None)  # Description from mdblist
     overwrite_description = mdblist_list.get("overwrite_description", None)  # From cfg
 
@@ -212,19 +211,39 @@ def process_list(mdblist_list: dict):
 
     set_poster(collection_id, collection_name, poster)
 
-    if collection_sort_name is not None:
-        emby.set_item_property(collection_id, "ForcedSortName", collection_sort_name)
+    sort_title_update = False
 
-    # Change sort name so that it shows up first.
-    # TODO If True previously and now False, it will not reset the sort name
-    elif (
-        update_collection_sort_name is True
-        and collection_sort_name is None
-        and items_added > 0
-    ):
-        collection_sort_name = f"!{minutes_until_2100()} {collection_name}"
-        emby.set_item_property(collection_id, "ForcedSortName", collection_sort_name)
+    # Formatted as: '{Prefix} {Time} {Collection Name}'
+
+    # If collection_sort_name is None, it will be set to the collection name
+    if collection_sort_name is None:
+        collection_sort_name = collection_name
+
+    # Remove unwanted words from the start of the collection name
+    # Mirrors the Emby sort name removal defaults found in system.xml
+    bad_words = ["the", "a", "an", "das", "der", "el", "la"]
+    for word in bad_words:
+        if collection_sort_name.lower().startswith(word):
+            collection_sort_name = collection_sort_name[len(word) + 1 :]
+
+
+    if collection_sort_date is True and (items_added > 0 or newly_removed > 0):
+        collection_sort_name = f"!{minutes_until_2100()} {collection_sort_name}"
+        sort_title_update = True
         logger.info(f"Updated sort name for {collection_name} to {collection_sort_name}")
+
+    elif collection_sort_prefix is not None:
+        collection_sort_name = f"{collection_sort_prefix} {collection_sort_name}"
+        sort_title_update = True
+        logger.info(f"Updated sort name for {collection_name} to {collection_sort_name}")
+
+    # No need to update the sort name if the collection doesn't use a custom sort name.  Will inherit the name.
+    if sort_title_update is True:
+        emby.set_item_property(collection_id, "ForcedSortName", collection_sort_name)
+    else:
+        logger.info(f"Collection {collection_name} will inherit the name.")
+
+
 
     if (
         use_mdblist_collection_description is True
@@ -269,6 +288,12 @@ def process_hardcoded_lists():
                     ),
                     "collection_sort_name": config_parser.get(
                         section, "collection_sort_name", fallback=None
+                    ),
+                    "collection_sort_prefix": config_parser.get(
+                        section, "collection_sort_prefix", fallback=None
+                    ),
+                    "collection_sort_date": config_parser.get(
+                        section, "collection_sort_date", fallback=False
                     ),
                     "overwrite_description": config_parser.get(
                         section, "description", fallback=None
@@ -321,19 +346,6 @@ def main():
     # logger.info()
     # logger.info(f"Emby Users: {emby.get_users()}")
     # logger.info()
-    # logger.info(f"MDBList User Info: {mdblist.get_mdblist_user_info()}")
-    # logger.info()
-
-    # Test getting a list via url
-    # mdblist_list = mdblist.get_list_using_url(
-    #    "https://mdblist.com/lists/amything/best-documentaries"
-    # )
-    # logger.info(mdblist_list)
-    # return
-
-    # Test getting all Emby collections
-    # logger.info(emby.get_all_collections(False))
-    # return
 
     while True:
 
@@ -356,6 +368,7 @@ def main():
             logger.error("Unable to connect to MDBList. Retrying in 5 min...")
             time.sleep(300)
             continue
+
 
         if download_manually_added_lists:
             process_hardcoded_lists()
