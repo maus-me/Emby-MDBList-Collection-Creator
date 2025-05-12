@@ -134,7 +134,7 @@ def process_list(mdblist_list: dict):
     elif mdblist_name is not None and user_name is not None:
         found_list_id = mdblist.find_list_id_by_name_and_user(mdblist_name, user_name)
         if found_list_id is None:
-            logger.info(f"ERROR! List {mdblist_name} by {user_name} not found. Skipping.")
+            logger.error(f"List {mdblist_name} by {user_name} not found. Skipping.")
             return
         mdblist_imdb_ids, mdblist_mediatypes = mdblist.get_list(found_list_id)
     elif source is not None:
