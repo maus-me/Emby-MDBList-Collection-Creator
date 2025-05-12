@@ -175,7 +175,7 @@ class Emby:
         Returns:
         - collections_list (list): List of dictionaries representing each collection, including its name, ID, and items (if include_contents is True).
         """
-        endpoint = f"/emby/users/{self.user_id}/items?Fields=ChildCount,RecursiveItemCount&Recursive=true&IncludeItemTypes=boxset"
+        endpoint = f"/emby/items?Recursive=true&Fields=ChildCount,RecursiveItemCount&IncludeItemTypes=boxset&IsFolder=true"
         url = self.server_url + endpoint
         response = requests.get(url, headers=self.headers)
         try:
