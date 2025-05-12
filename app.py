@@ -347,13 +347,13 @@ def main():
 
         emby_info = emby.get_system_info()
         if emby_info is False:
-            logger.error("Error connecting to Emby. Retrying in 5 min...")
+            logger.error("Unable to connect to Emby. Retrying in 5 min...")
             time.sleep(300)
             continue
 
         mdblist_user_info = mdblist.get_user_info()
         if mdblist_user_info is False:
-            logger.error("Error connecting to MDBList. Retrying in 5 min...")
+            logger.error("Unable to connect to MDBList. Retrying in 5 min...")
             time.sleep(300)
             continue
 
