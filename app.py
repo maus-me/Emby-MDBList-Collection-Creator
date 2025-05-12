@@ -143,11 +143,11 @@ def process_list(mdblist_list: dict):
             mdblist_imdb_ids.extend(imdb_ids)
             mdblist_mediatypes.extend(mediatypes)
     else:
-        logger.error(f"ERROR! Must provide either id or source for {collection_name}.")
+        logger.error(f"Must provide either id or source for {collection_name}.")
         return
 
     if mdblist_imdb_ids is None:
-        logger.error(f"ERROR! No items in {collection_name}. Will not process this list.")
+        logger.error(f"No items in {collection_name}. Will not process this list.")
         return
 
     remove_emby_ids = []
@@ -155,7 +155,7 @@ def process_list(mdblist_list: dict):
 
     if len(mdblist_imdb_ids) == 0:
         logger.error(
-            f"ERROR! No items in mdblist {collection_name}. Will not process this list. Perhaps you need to wait for it to populate?"
+            f"No items in mdblist {collection_name}. Will not process this list. Perhaps you need to wait for it to populate?"
         )
         return
 
@@ -171,7 +171,7 @@ def process_list(mdblist_list: dict):
                 collection_id, ["ProviderIds"]
             )
         except Exception as e:
-            logger.error(f"Error getting items in collection: {e}")
+            logger.error(f"Exception getting items in collection: {e}")
             return
 
         collection_imdb_ids = [item["Imdb"] for item in collection_items]
@@ -190,7 +190,7 @@ def process_list(mdblist_list: dict):
 
     if collection_id is None:
         if len(add_emby_ids) == 0:
-            logger.error(f"ERROR! No items to put in mdblist {collection_name}.")
+            logger.error(f"No items to put in mdblist {collection_name}.")
             return
         # Create the collection with the first item since you have to create with an item
         collection_id = emby.create_collection(collection_name, [add_emby_ids[0]])
@@ -246,7 +246,7 @@ def process_my_lists_on_mdblist():
 def process_hardcoded_lists():
     collections = []
     for section in config_parser.sections():
-        if section == "admin":
+        if section == "admin" or section == "temp" or section == "categories":
             continue
         try:
             collections.append(
