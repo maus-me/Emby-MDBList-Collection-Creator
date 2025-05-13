@@ -1,6 +1,6 @@
 # src/logger_config.py
 import logging
-
+import os
 
 def setup_logging(level=logging.INFO):
     # Configure the root logger
@@ -22,6 +22,17 @@ def setup_logging(level=logging.INFO):
 
     # Add handler to root logger
     root_logger.addHandler(console_handler)
+
+    # Create a directory for logs if it doesn't exist
+    log_dir = 'logs'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
+    # Create logs.log file if it doesn't exist
+    log_file_path = os.path.join(log_dir, 'logs.log')
+    if not os.path.exists(log_file_path):
+        with open(log_file_path, 'w') as f:
+            pass  # Create an empty file
 
     # Add file handler if needed
     file_handler = logging.FileHandler('logs/logs.log')
