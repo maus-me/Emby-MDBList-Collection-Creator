@@ -12,7 +12,7 @@ import requests
 from src.emby import Emby
 from src.item_sorting import ItemSorting
 from src.refresher import Refresher
-from src.mdblist import Mdblist
+from src.connectors.mdblist import Mdblist
 from src.date_parser import inside_period
 from src.db import Db
 from src.utils import find_missing_entries_in_list
@@ -221,8 +221,8 @@ def process_list(mdblist_list: dict):
 
     # Remove unwanted words from the start of the collection name
     # Mirrors the Emby sort name removal defaults found in system.xml
-    bad_words = ["the", "a", "an", "das", "der", "el", "la"]
-    for word in bad_words:
+    unwanted_words = ["the", "a", "an", "das", "der", "el", "la"]
+    for word in unwanted_words:
         if collection_sort_name.lower().startswith(word):
             collection_sort_name = collection_sort_name[len(word) + 1 :]
 

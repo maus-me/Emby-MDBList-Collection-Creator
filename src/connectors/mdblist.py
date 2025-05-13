@@ -10,22 +10,13 @@ class Mdblist:
         self.api_key = api_key
         self.user_info_url = "https://api.mdblist.com/user/?apikey=" + api_key
         self.my_lists_url = "https://api.mdblist.com/lists/user/?apikey=" + api_key
-        self.search_lists_url = (
-            "https://api.mdblist.com/lists/search?query={query}&apikey=" + api_key
-        )
-        self.get_lists_of_user_url = (
-            "https://api.mdblist.com/lists/user/{id}/?apikey=" + api_key
-        )
-        self.items_url = (
-            "https://api.mdblist.com/lists/{list_id}/items/?apikey=" + api_key
-        )
+        self.search_lists_url = "https://api.mdblist.com/lists/search?query={query}&apikey=" + api_key
+
+        self.get_lists_of_user_url = "https://api.mdblist.com/lists/user/{id}/?apikey=" + api_key
+        self.items_url = "https://api.mdblist.com/lists/{list_id}/items/?apikey=" + api_key
         self.top_lists_url = "https://api.mdblist.com/lists/top?apikey=" + api_key
-        self.get_list_by_name_url = (
-            "https://api.mdblist.com/lists/{username}/{listname}?apikey=" + api_key
-        )
-        self.get_list_by_id_url = (
-            "https://api.mdblist.com/lists/{list_id}?apikey=" + api_key
-        )
+        self.get_list_by_name_url = "https://api.mdblist.com/lists/{username}/{listname}?apikey=" + api_key
+        self.get_list_by_id_url = "https://api.mdblist.com/lists/{list_id}?apikey=" + api_key
 
     def get_user_info(self):
         try:
