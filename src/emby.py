@@ -34,9 +34,8 @@ class Emby:
             response = requests.get(url, headers=self.headers)
             return response.json()
         except Exception as e:
-            logger.error(
-                f"Error occurred while getting Emby system info, check your configuration. Check your Emby url and port, user ID and API key: {e}"
-            )
+            logger.error(f"Error occurred while getting Emby system info, check your configuration. "
+                         f"Check your Emby url and port, user ID and API key: {e}")
             return False
 
     def get_users(self):
@@ -411,50 +410,6 @@ class Emby:
                 break
 
         return all_items
-
-    def set_item_as_played(self, user_id, item_id):
-        """
-        Set an item as played for a specific user.
-
-        Args:
-            user_id (str): The ID of the user.
-            item_id (str): The ID of the item to mark as played.
-
-        Returns:
-            bool: True if the item was marked as played successfully, False otherwise.
-        """
-        endpoint = f"/emby/Users/{user_id}/PlayedItems/{item_id}"
-        url = self.server_url + endpoint
-        response = requests.post(url, headers=self.headers)
-        if response.status_code == 200:
-            return True
-        else:
-            logger.error(
-                f"Error marking item {item_id} as played for user {user_id}: {response.content}"
-            )
-            return False
-
-    def set_item_as_favorite(self, user_id, item_id):
-        """
-        Set an item as a favorite for a specific user.
-
-        Args:
-            user_id (str): The ID of the user.
-            item_id (str): The ID of the item to mark as a favorite.
-
-        Returns:
-            bool: True if the item was marked as a favorite successfully, False otherwise.
-        """
-        endpoint = f"/emby/Users/{user_id}/FavoriteItems/{item_id}"
-        url = self.server_url + endpoint
-        response = requests.post(url, headers=self.headers)
-        if response.status_code == 200:
-            return True
-        else:
-            logger.error(
-                f"Error marking item {item_id} as a favorite for user {user_id}: {response.content}"
-            )
-            return False
 
     def set_image(
         self,
