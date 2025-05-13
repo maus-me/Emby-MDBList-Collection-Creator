@@ -223,9 +223,9 @@ def process_list(mdblist_list: dict):
     # Mirrors the Emby sort name removal defaults found in system.xml
     unwanted_words = ["the", "a", "an", "das", "der", "el", "la"]
     for word in unwanted_words:
-        if collection_sort_name.lower().startswith(word):
-            collection_sort_name = collection_sort_name[len(word) + 1 :]
-
+        word_with_space = f'{word} '
+        if collection_sort_name.lower().startswith(word_with_space):
+            collection_sort_name = collection_sort_name[len(word_with_space):]
 
     if collection_sort_date is True and (items_added > 0 or newly_removed > 0):
         collection_sort_name = f"!{minutes_until_2100()} {collection_sort_name}"
