@@ -24,7 +24,7 @@ config_parser = configparser.ConfigParser(interpolation=configparser.ExtendedInt
 config_parser.optionxform = str.lower
 
 # Check if config_hidden.cfg exists, if so, use that, otherwise use config.cfg
-if config_parser.read("config_hidden.cfg", encoding="utf-8") == []:
+if not config_parser.read("config_hidden.cfg", encoding="utf-8"):
     config_parser.read("config.cfg")
 
 emby_server_url = config_parser.get("admin", "emby_server_url")
@@ -154,7 +154,6 @@ def process_list(mdblist_list: dict):
         return
 
     remove_emby_ids = []
-    missing_imdb_ids = []
 
     if len(mdblist_imdb_ids) == 0:
         logger.error(
@@ -202,7 +201,7 @@ def process_list(mdblist_list: dict):
     if collection_id not in all_collections_ids:
         all_collections_ids.append(collection_id)
 
-    if update_collection_items_sort_names is True:
+    if update_collection_items_sort_names:
         collection_ids_with_custom_sorting.append(collection_id)
 
     items_added = emby.add_to_collection(collection_name, add_emby_ids)
@@ -238,7 +237,7 @@ def process_list(mdblist_list: dict):
         logger.info(f"Updated sort name for {collection_name} to {collection_sort_name}")
 
     # No need to update the sort name if the collection doesn't use a custom sort name.  Will inherit the name.
-    if sort_title_update is True:
+    if sort_title_update:
         emby.set_item_property(collection_id, "ForcedSortName", collection_sort_name)
     else:
         logger.info(f"Collection {collection_name} will inherit the name.")
@@ -350,7 +349,7 @@ def main():
     while True:
 
         try:
-            response = requests.get("https://www.google.com/", timeout=5)
+            requests.get("https://www.google.com/", timeout=5)
             logger.info("Internet connection is available.")
         except requests.RequestException:
             logger.warning("No internet connection. Check your connection. Retrying in 5 min...")
@@ -393,13 +392,13 @@ def main():
 
         item_sorting.reset_items_not_in_custom_sort_categories()
 
-        if refresh_items is True:
+        if refresh_items:
             logger.info(
                 f"Refreshing metadata for items that were added within {refresh_items_max_days_since_added} days AND premiered within {refresh_items_max_days_since_premiered} days.\n"
             )
 
         for collection_id in all_collections_ids:
-            if refresh_items is True:
+            if refresh_items:
                 refresher.process_collection(
                     collection_id,
                     refresh_items_max_days_since_added,
