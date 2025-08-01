@@ -384,7 +384,7 @@ class Emby:
         all_items = []
 
         while True:
-            print(".", end="", flush=True)
+            logger.info("Processing...")
             time.sleep(self.seconds_between_requests)
             query_params["StartIndex"] = start_index
             response = requests.get(url, headers=self.headers, params=query_params)
@@ -585,7 +585,7 @@ class Emby:
             start_index = i * batch_size
             end_index = min((i + 1) * batch_size, len(item_ids))
             batch_item_ids = item_ids[start_index:end_index]
-            print(".", end="", flush=True)
+            logger.info("Processing...")
 
             if operation == "add":
                 response = requests.post(

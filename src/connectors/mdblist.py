@@ -135,9 +135,7 @@ class Mdblist:
                 else:
                     logger.info(f"Could not find imdb_id in item {item}.")
             if len(imdb_ids) == 0:
-                logger.error(
-                    f"Cannot find any items in list with api url {url} and public url {url.replace('/json','')}."
-                )
+                logger.error(f"Cannot find any items in list with api url {url} and public url {url.replace('/json','')}.")
             return imdb_ids, self.check_list_mediatype(lst)
         else:
             logger.info(f"No response received from {url}")
