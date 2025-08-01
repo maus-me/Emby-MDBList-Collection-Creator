@@ -244,13 +244,26 @@ def process_list(mdblist_list: dict):
 
 
 
-    if (
-        use_mdblist_collection_description is True
-        and bool(description)
-        and overwrite_description is None
+    if (use_mdblist_collection_description is True
+            and bool(description)
+            and overwrite_description is None
     ):
+        # Strip any leading and trailing quotes from the description
+        if description.startswith('"') and description.endswith('"'):
+            description = description[1:-1]
+        # Also handle single quotes if needed
+        elif description.startswith("'") and description.endswith("'"):
+            description = description[1:-1]
+
         emby.set_item_property(collection_id, "Overview", description)
     elif overwrite_description is not None:
+        # Strip any leading and trailing quotes from the description
+        if overwrite_description.startswith('"') and overwrite_description.endswith('"'):
+            overwrite_description = overwrite_description[1:-1]
+        # Also handle single quotes if needed
+        elif overwrite_description.startswith("'") and overwrite_description.endswith("'"):
+            overwrite_description = overwrite_description[1:-1]
+
         emby.set_item_property(collection_id, "Overview", overwrite_description)
 
 
@@ -309,7 +322,7 @@ def process_hardcoded_lists():
 def set_poster(collection_id, collection_name, poster_path=None):
     """
     Sets the poster for a collection. Will not upload if temp config file
-    shows that it been uploaded before.
+    shows that it has been uploaded before.
 
     Args:
         collection_id (str): The ID of the collection.
@@ -340,11 +353,6 @@ def main():
     global newly_added
     global newly_removed
     iterations = 0
-
-    # logger.info(f"Emby System Info: {emby.get_system_info()}")
-    # logger.info()
-    # logger.info(f"Emby Users: {emby.get_users()}")
-    # logger.info()
 
     while True:
 
