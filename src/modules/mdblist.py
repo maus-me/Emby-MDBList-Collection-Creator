@@ -1,8 +1,5 @@
 """
-Configuration Parser Module
-
-This module handles loading and parsing of configuration settings from the collections config files.
-It provides access to configuration values through exported variables and functions.
+This module handles the processing of MDBList collections.
 """
 import configparser
 import logging
@@ -16,7 +13,6 @@ from src.connectors.emby import Emby
 from src.item_sorting import ItemSorting
 from src.modules.collections_parse import load_config
 from src.modules.config_parse import *
-from src.modules.config_parse import config_parser
 from src.refresher import Refresher
 from src.utils import find_missing_entries_in_list
 from src.utils import minutes_until_2100
@@ -37,10 +33,13 @@ db_manager = Db()
 # Load configuration
 collections_parser = load_config()
 
+# class Mdblist:
+#     def __init__(self):
+#
+
 def run():
     global newly_added
     global newly_removed
-    iterations = 0
 
     while True:
         if DOWNLOAD_MANUALLY_ADDED_LISTS:
@@ -77,13 +76,6 @@ def run():
                     REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_ADDED,
                     REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_PREMIERED,
                 )
-
-        if HOURS_BETWEEN_REFRESH == 0:
-            break
-
-        logger.info(f"Waiting {HOURS_BETWEEN_REFRESH} hours for next refresh.\n\n")
-        time.sleep(HOURS_BETWEEN_REFRESH * 3600)
-        iterations += 1
 
 def set_poster(collection_id, collection_name, poster_path=None):
     """

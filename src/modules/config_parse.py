@@ -119,8 +119,10 @@ USE_MDB_COLLECTION_DESCRIPTION = config_parser.getboolean(
     "admin", "use_mdblist_collection_description", fallback=False
 )
 
-HOURS_BETWEEN_REFRESH = config_parser.getint("admin", "hours_between_refresh")
+WAIT_TIME = config_parser.getint("admin", "hours_between_refresh")
 LOG_FILE_PATH = get_config_value(config_parser, "admin", "log_file_path", "logs/logs.log")
+TESTING = config_parser.getboolean("admin", "testing", fallback=False)
+ON_STARTUP = config_parser.getboolean("admin", "on_startup", fallback=True)
 
 __all__ = [
     "EMBY_SERVER_URL",
@@ -134,6 +136,8 @@ __all__ = [
     "REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_ADDED",
     "REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_PREMIERED",
     "USE_MDB_COLLECTION_DESCRIPTION",
-    "HOURS_BETWEEN_REFRESH",
-    "LOG_FILE_PATH"
+    "WAIT_TIME",
+    "LOG_FILE_PATH",
+    "TESTING",
+    "ON_STARTUP"
 ]
