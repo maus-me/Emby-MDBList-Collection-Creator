@@ -91,38 +91,27 @@ def get_config_value(config_parser: configparser.ConfigParser, section: str, opt
 # Load configuration
 config_parser = load_config()
 
+# Emby Configurations
+EMBY_SERVER_URL = get_config_value(config_parser, "emby", "emby_server_url")
+EMBY_USER_ID = get_config_value(config_parser, "emby", "emby_user_id")
+EMBY_API_KEY = get_config_value(config_parser, "emby", "emby_api_key")
 
-EMBY_SERVER_URL = config_parser.get("admin", "emby_server_url")
-EMBY_USER_ID = config_parser.get("admin", "emby_user_id")
-EMBY_API_KEY = config_parser.get("admin", "emby_api_key")
-MDBLIST_API_KEY = config_parser.get("admin", "mdblist_api_key")
+# MDbList Configurations
+MDBLIST_API_KEY = get_config_value(config_parser, "mdblist", "mdblist_api_key")
 
-DOWNLOAD_MANUALLY_ADDED_LISTS = config_parser.getboolean(
-    "admin", "download_manually_added_lists", fallback=True
-)
-DOWNLOAD_MY_MDBLIST_LISTS_AUTOMATICALLY = config_parser.getboolean(
-    "admin", "download_my_mdblist_lists_automatically", fallback=True
-)
-UPDATE_ITEMS_SORT_NAMES_DEFAULT_VALUE = config_parser.getboolean(
-    "admin", "update_items_sort_names_default_value", fallback=False
-)
-REFRESH_ITEMS = config_parser.getboolean(
-    "admin", "refresh_items_in_collections", fallback=False
-)
-REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_ADDED = config_parser.getint(
-    "admin", "refresh_items_in_collections_max_days_since_added", fallback=10
-)
-REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_PREMIERED = config_parser.getint(
-    "admin", "refresh_items_in_collections_max_days_since_premiered", fallback=30
-)
-USE_MDB_COLLECTION_DESCRIPTION = config_parser.getboolean(
-    "admin", "use_mdblist_collection_description", fallback=False
-)
+# Admin Configurations
+DOWNLOAD_MANUALLY_ADDED_LISTS = get_config_value(config_parser,"admin", "download_manually_added_lists", False, "bool")
+DOWNLOAD_MY_MDBLIST_LISTS_AUTOMATICALLY = get_config_value(config_parser,"admin", "download_my_mdblist_lists_automatically", True, "bool")
+UPDATE_ITEMS_SORT_NAMES_DEFAULT_VALUE = get_config_value(config_parser, "admin", "update_items_sort_names_default_value", False, "bool")
+REFRESH_ITEMS = get_config_value(config_parser, "admin", "refresh_items_in_collections", False, "bool")
+REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_ADDED = get_config_value(config_parser, "admin", "refresh_items_in_collections_max_days_since_added", 10, "int")
+REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_PREMIERED = get_config_value(config_parser, "admin", "refresh_items_in_collections_max_days_since_premiered", 30, "int")
+USE_MDB_COLLECTION_DESCRIPTION = get_config_value(config_parser, "admin", "use_mdblist_collection_description", False, "bool")
 
-WAIT_TIME = config_parser.getint("admin", "hours_between_refresh")
-LOG_FILE_PATH = get_config_value(config_parser, "admin", "log_file_path", "logs/logs.log")
-TESTING = config_parser.getboolean("admin", "testing", fallback=False)
-ON_STARTUP = config_parser.getboolean("admin", "on_startup", fallback=True)
+WAIT_TIME = get_config_value(config_parser, "admin", "hours_between_refresh", 24, "int")
+LOG_FILE_PATH = get_config_value(config_parser, "admin", "log_file_path", "logs/logs.log", "str")
+TESTING = get_config_value(config_parser, "admin", "testing", False, "bool")
+ON_STARTUP = get_config_value(config_parser, "admin", "on_startup", True, "bool")
 
 __all__ = [
     "EMBY_SERVER_URL",
