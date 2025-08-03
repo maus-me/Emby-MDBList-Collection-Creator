@@ -60,4 +60,4 @@ venv/
 .vscode/
 
 # Project specific
-config_hidden.cfg
+config/config_hidden.cfg

@@ -1,4 +1,4 @@
-config_hidden*
+config/config_hidden.cfg
 __pycache__/
 backup/
 notes.txt
