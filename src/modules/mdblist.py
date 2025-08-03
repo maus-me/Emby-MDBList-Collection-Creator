@@ -136,6 +136,9 @@ def process_hardcoded_lists():
                     "overwrite_description": collections_parser.get(
                         section, "description", fallback=None
                     ),
+                    "active_between": collections_parser.get(
+                        section, "active_between", fallback=None
+                    )
                 }
             )
         except configparser.NoOptionError as e:
@@ -172,12 +175,11 @@ def process_list(mdblist_list: dict):
     collection_sort_date = mdblist_list.get("collection_sort_date", False)
     description = mdblist_list.get("description", None)  # Description from mdblist
     overwrite_description = mdblist_list.get("overwrite_description", None)  # From cfg
+    active_period_str = mdblist_list.get("active_between", None)
 
     collection_id = emby.get_collection_id(collection_name)
 
-    active_period_str = collections_parser.get(
-        collection_name, "active_between", fallback=None
-    )
+
 
     if active_period_str:
         if not inside_period(active_period_str):
