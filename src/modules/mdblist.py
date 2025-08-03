@@ -6,16 +6,13 @@ It provides access to configuration values through exported variables and functi
 """
 import configparser
 import logging
-import os
 import random
 import time
-from configparser import ConfigParser
-from typing import Any, List
 
 from src.connectors.mdblist import Mdblist
 from src.date_parser import inside_period
 from src.db import Db
-from src.emby import Emby
+from src.connectors.emby import Emby
 from src.item_sorting import ItemSorting
 from src.modules.collections_parse import load_config
 from src.modules.config_parse import *
