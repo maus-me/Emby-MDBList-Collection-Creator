@@ -175,7 +175,7 @@ def process_list(mdblist_list: dict):
 
     collection_id = emby.get_collection_id(collection_name)
 
-    active_period_str = config_parser.get(
+    active_period_str = collections_parser.get(
         collection_name, "active_between", fallback=None
     )
 
