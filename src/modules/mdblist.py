@@ -57,46 +57,46 @@ class MdblistProcessor:
         Returns:
             None
         """
-        while True:
-            try:
-                # Process collections from different sources
-                if DOWNLOAD_MANUALLY_ADDED_LISTS:
-                    self.process_hardcoded_lists()
-                if DOWNLOAD_MY_MDBLIST_LISTS_AUTOMATICALLY:
-                    self.process_my_lists_on_mdblist()
-                
-                # Log summary of changes
-                logger.info(f"SUMMARY: Added {self.newly_added} to collections and removed {self.newly_removed}")
-                self.newly_added = 0
-                self.newly_removed = 0
-                
-                # Update sort names for items in collections with custom sorting
-                if self.collection_ids_with_custom_sorting:
-                    logger.info("Setting sort names for new items in collections")
-                    for collection_id in self.collection_ids_with_custom_sorting:
-                        self.item_sorting.process_collection(collection_id)
-                    
-                    logger.info("Reverting sort names that are no longer in collections, fetching items:")
-                
-                # Reset sort names for items no longer in collections with custom sorting
-                self.item_sorting.reset_items_not_in_custom_sort_categories()
-                
-                # Refresh metadata for recently added or premiered items
-                if REFRESH_ITEMS:
-                    logger.info(
-                        f"Refreshing metadata for items that were added within {REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_ADDED} days "
-                        f"AND premiered within {REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_PREMIERED} days."
+
+        try:
+            # Process collections from different sources
+            if DOWNLOAD_MANUALLY_ADDED_LISTS:
+                self.process_hardcoded_lists()
+            if DOWNLOAD_MY_MDBLIST_LISTS_AUTOMATICALLY:
+                self.process_my_lists_on_mdblist()
+
+            # Log summary of changes
+            logger.info(f"SUMMARY: Added {self.newly_added} to collections and removed {self.newly_removed}")
+            self.newly_added = 0
+            self.newly_removed = 0
+
+            # Update sort names for items in collections with custom sorting
+            if self.collection_ids_with_custom_sorting:
+                logger.info("Setting sort names for new items in collections")
+                for collection_id in self.collection_ids_with_custom_sorting:
+                    self.item_sorting.process_collection(collection_id)
+
+                logger.info("Reverting sort names that are no longer in collections, fetching items:")
+
+            # Reset sort names for items no longer in collections with custom sorting
+            self.item_sorting.reset_items_not_in_custom_sort_categories()
+
+            # Refresh metadata for recently added or premiered items
+            if REFRESH_ITEMS:
+                logger.info(
+                    f"Refreshing metadata for items that were added within {REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_ADDED} days "
+                    f"AND premiered within {REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_PREMIERED} days."
+                )
+
+                for collection_id in self.all_collections_ids:
+                    self.refresher.process_collection(
+                        collection_id,
+                        REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_ADDED,
+                        REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_PREMIERED,
                     )
-                    
-                    for collection_id in self.all_collections_ids:
-                        self.refresher.process_collection(
-                            collection_id,
-                            REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_ADDED,
-                            REFRESH_ITEMS_IN_COLLECTIONS_MAX_DAYS_SINCE_PREMIERED,
-                        )
-            except Exception as e:
-                logger.error(f"Error in main processing loop: {e}")
-                time.sleep(60)  # Wait a minute before retrying
+        except Exception as e:
+            logger.error(f"Error in main processing loop: {e}")
+            time.sleep(60)  # Wait a minute before retrying
 
     def set_poster(self, collection_id: str, collection_name: str, poster_path: Optional[str] = None) -> bool:
         """
